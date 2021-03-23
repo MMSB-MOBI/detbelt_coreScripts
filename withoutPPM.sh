@@ -33,8 +33,11 @@ $calculateVolTot ./det_file.txt $detergentVolumes > Volume_total.txt
 naccess $pdbUserOriented > /dev/null
 half_thickness=`grep "1/2 of bilayer thickness" $pdbUserOriented | awk '{print $6}' | head -n 1`
 echo $half_thickness > ./half_thickness.txt
-awk -v L=$half_thickness 'BEGIN{FS=""}{Z=substr($0,47,8)+0; X=substr($0,30,8)+0; Y=substr($0,39,8)+0; ACC=substr($0,56,8)+0; if(Z>-L&& Z<L && ACC>3.0){print X*X+Y*Y}}' ${pdbName}out.asa > squared_radii.txt
-awk -v L=$half_thickness 'BEGIN{FS=""}{Z=substr($0,47,8)+0; X=substr($0,30,8)+0; Y=substr($0,39,8)+0; ACC=substr($0,56,8)+0; if(Z>-L&& Z<L){AHS = AHS + ACC}} END{print AHS}' ${pdbName}out.asa > ahs.txt
+# Ignore residues at less than 2 Angstrom of the border, with  L=L-2
+# The goal is to downweight tangential helices
+awk -v L=$half_thickness 'BEGIN{FS="";L=L-2}{Z=substr($0,47,8)+0; X=substr($0,30,8)+0; Y=substr($0,39,8)+0; ACC=substr($0,56,8)+0; if(Z>-L&& Z<L && ACC>3.0){print X*X+Y*Y}}' ${pdbName}out.asa > squared_radii.txt
+awk -v L=$half_thickness 'BEGIN{FS="";L=L-2}{Z=substr($0,47,8)+0; X=substr($0,30,8)+0; Y=substr($0,39,8)+0; ACC=substr($0,56,8)+0; if(Z>-L&& Z<L && ACC>3.0){print $0}}' ${pdbName}out.asa > exposed.pdb
+awk -v L=$half_thickness 'BEGIN{FS="";L=L-2}{Z=substr($0,47,8)+0; X=substr($0,30,8)+0; Y=substr($0,39,8)+0; ACC=substr($0,56,8)+0; if(Z>-L&& Z<L){AHS = AHS + ACC}} END{print AHS}' ${pdbName}out.asa > ahs.txt
 
 
 ##### RADIUS #####
