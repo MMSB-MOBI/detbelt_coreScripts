@@ -1,35 +1,39 @@
-X=read.table("squared_radii.txt")
-
-colnames(X)="radius"
-X$radius=sqrt(X$radius)
-
-# estimate density
-#D=density(X$radius)
-# set bandwidth to avoid having very small peaks in the density
-D=density(X$radius,bw=3)
-
-get_right_peak=function(X)
+get_right_peak=function(y)
     {
         # add azero on the left
-        X_pos_offset=c(0,X[-length(X)])
+        Y_pos_offset=c(0,y[-length(y)])
         # add azero on the right
-        X_neg_offset=c(X[-1],0)
+        Y_neg_offset=c(y[-1],0)
         # detect local maximum
-        peaks=which(X>X_pos_offset && X>X_neg_offset)
+        peaks=which(y>Y_pos_offset & y>Y_neg_offset)
         # get the rightmost peak
-        return(max(which(X>X_pos_offset & X>X_neg_offset)))
-
+        # but ignore peaks that correspond to less than 1% of the data with & y>0.01
+        return(max(which(y>Y_pos_offset & y>Y_neg_offset & y>0.01)))
     }
 
+X=read.table("squared_radii.txt")
+colnames(X)="radius"
+X$radius=sqrt(X$radius)
+hist(X$radius)
+
+# estimate density
+D=density(X$radius)
 protein_radius=D$x[get_right_peak(D$y)]
+plot(D$x,D$y,main=paste("old density, final radius=",protein_radius+1.66))
+abline(v=protein_radius,col="red")
+abline(v=protein_radius+1.66,col="green")
+
+# set bandwidth to avoid having very small peaks in the density
+D=density(X$radius,bw=2)
+protein_radius=D$x[get_right_peak(D$y)]
+plot(D$x,D$y,main=paste("new density, final radius=",protein_radius+1.66))
+abline(v=protein_radius,col="red")
+abline(v=protein_radius+1.66,col="green")
 
 
 #library(ggplot2)
 # Add y=..density.. to scale to density
 #ggplot(X,aes(radius))+geom_histogram(aes(y=..density..))+geom_vline(xintercept=protein_radius, col="red")+geom_density()
-hist(X$radius)
-plot(D$x,D$y)
-abline(v=protein_radius,col="red")
 
 protein_radius=protein_radius+1.66
 
