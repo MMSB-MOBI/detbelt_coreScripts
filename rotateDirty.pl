@@ -6,6 +6,7 @@
 
 use strict;
 use warnings;
+no warnings;
 
 while(<>) {
     if ($_ !~ /^(ATOM|HETATM)/) {

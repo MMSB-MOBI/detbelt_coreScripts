@@ -1,0 +1,9 @@
+open xx.pdb     #creates model#1
+
+#create the cylinder, it will make a separate model #2
+shape cylinder radius 23.6 height 35 caps false slab 0,25.1
+#the 23.6 is the value of inner radius.
+#the expression 0,25.1  means it starts at the inner radius, and extends to 25.1 which is the belt thickness. height of 35 is double the Half-height value.
+
+#transparency of model#2
+transparency #2 50

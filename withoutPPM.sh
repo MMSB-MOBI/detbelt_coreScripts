@@ -16,16 +16,16 @@
 pdbName="1PDB" # arbitrary name
 pdbUserOriented="${pdbName}out.pdb"
 
-SOURCEDIR=`pwd`
-mkdir $SOURCEDIR/results/
+SOURCEDIR=$SLURM_SUBMIT_DIR
+mkdir -p $SOURCEDIR/results/
 cd $WORKDIR
-perl -ne 'if (!($_ =~ /^HETATM/ && $_ !~ /DUM/)) {print;}' $pdbFile > ./$pdbUserOriented # save the PDB file in the workdir, gettin rid of HETATM records
+awk '!(/^HETATM/ && !/DUM/)' $pdbFile > ./$pdbUserOriented # save the PDB file in the workdir, gettin rid of HETATM records
 
 
 ##### VOLUME #####
 # compute total detergent volume
 cp $detergentFile ./det_file.txt
-$calculateVolTot ./det_file.txt $detergentVolumes > Volume_total.txt
+python3 $calculateVolTot ./det_file.txt $detergentVolumes > Volume_total.txt
 
 
 ##### NACCESS #####
@@ -45,14 +45,13 @@ awk -v L=$half_thickness 'BEGIN{FS="";L=L-2}{Z=substr($0,47,8)+0; X=substr($0,30
 echo $half_thickness | awk '{print $1*2}' > Thickness.txt
 R CMD BATCH $calculateRadius #> /dev/null
 
-
 ##### RESULTS #####
 awk '{printf "%s %s %6.2f\n", "REMARK",$1,$2}' radius.txt > out.pdb
 cat ./$pdbUserOriented >> out.pdb
 
-perl $orientForDisplay ./out.pdb > forDisplay.pdb
+python3 $orientForDisplay ./out.pdb > forDisplay.pdb
 
 resultsPath=$SOURCEDIR/results/
 echo "{\"resultsPath\" : \"$resultsPath\"}"
-cp ./* $SOURCEDIR/results/
+cp ./* $SOURCEDIR/results
 

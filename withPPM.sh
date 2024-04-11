@@ -24,7 +24,7 @@ SOURCEDIR=`pwd`
 mkdir $SOURCEDIR/results/
 mkdir $SOURCEDIR/resultsPPM/
 cd $WORKDIR
-perl -ne 'if (!($_ =~ /^HETATM/ && $_ !~ /DUM/)) {print;}' $pdbFile > ./$pdbUser # save the PDB file in the workdir, gettin rid of HETATM records
+awk '!(/^HETATM/ && !/DUM/)' $pdbFile > ./$pdbUserOriented # save the PDB file in the workdir, gettin rid of HETATM records
 
 
 ##### PPM #####
@@ -66,7 +66,7 @@ R CMD BATCH $calculateRadius #> /dev/null
 awk '{printf "%s %s %6.2f\n", "REMARK",$1,$2}' radius.txt > out.pdb
 cat ./$pdbOriented >> out.pdb
 
-perl $orientForDisplay ./out.pdb > forDisplay.pdb
+python3 $orientForDisplay ./out.pdb > forDisplay.pdb
 
 resultsPath=$SOURCEDIR/results/
 echo "{\"resultsPath\" : \"$resultsPath\"}"
